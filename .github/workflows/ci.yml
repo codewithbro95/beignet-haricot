@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop, main]
+    branches: [develop]
   pull_request:
     branches: [develop, main]
 
@@ -15,12 +15,8 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify (${{ matrix.platform }})
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [ubuntu-22.04, windows-latest, macos-latest]
-    runs-on: ${{ matrix.platform }}
+    name: Verify
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out repository
@@ -43,7 +39,6 @@ jobs:
           workspaces: src-tauri
 
       - name: Install Linux system dependencies
-        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
