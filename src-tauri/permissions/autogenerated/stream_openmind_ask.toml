@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-stream-openmind-ask"
+description = "Enables the stream_openmind_ask command without any pre-configured scope."
+commands.allow = ["stream_openmind_ask"]
+
+[[permission]]
+identifier = "deny-stream-openmind-ask"
+description = "Denies the stream_openmind_ask command without any pre-configured scope."
+commands.deny = ["stream_openmind_ask"]

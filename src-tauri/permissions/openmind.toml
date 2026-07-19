@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-openmind-client-api"
+description = "Allows the bundled main window to call the constrained OpenMind API bridge."
+commands.allow = ["openmind_request", "openmind_image_preview", "stream_openmind_ask"]

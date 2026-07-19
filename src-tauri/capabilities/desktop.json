@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop",
+  "description": "Minimal permissions for the bundled OpenMind client window.",
+  "windows": ["main"],
+  "platforms": ["macOS", "windows", "linux"],
+  "permissions": [
+    "core:default",
+    "core:image:deny-from-path",
+    "dialog:allow-open",
+    "allow-openmind-client-api"
+  ]
+}

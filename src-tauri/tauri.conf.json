@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "beignet haricot",
+  "version": "0.0.1",
+  "identifier": "com.codewithbro.beignetharicot",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "beignet haricot",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 900,
+        "minHeight": 620,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "capabilities": [
+        "desktop"
+      ],
+      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost ws://localhost:1420; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "A lightweight OpenMind client",
+    "longDescription": "Search and ask questions across your local OpenMind memory.",
+    "macOS": {
+      "signingIdentity": "-"
+    }
+  }
+}

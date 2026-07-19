@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-openmind-request"
+description = "Enables the openmind_request command without any pre-configured scope."
+commands.allow = ["openmind_request"]
+
+[[permission]]
+identifier = "deny-openmind-request"
+description = "Denies the openmind_request command without any pre-configured scope."
+commands.deny = ["openmind_request"]

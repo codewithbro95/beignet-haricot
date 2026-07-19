@@ -1,0 +1,1 @@
+{"desktop":{"identifier":"desktop","description":"Minimal permissions for the bundled OpenMind client window.","local":true,"windows":["main"],"permissions":["core:default","core:image:deny-from-path","dialog:allow-open","allow-openmind-client-api"],"platforms":["macOS","windows","linux"]}}
