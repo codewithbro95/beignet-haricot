@@ -15,7 +15,7 @@ If `vX.Y.Z` is not already published, the release workflow builds:
 - Windows NSIS and MSI installers
 - Linux AppImage and Debian packages
 
-The release stays private as a draft until every platform artifact has uploaded successfully. The workflow then publishes it as `vX.Y.Z` with notes from `CHANGELOG.md`.
+The workflow prepares a private draft, then each platform uploads its installers independently. The first successful platform build publishes `vX.Y.Z` with notes from `CHANGELOG.md`; installers from other successful platforms are added as their builds finish. A failure on one platform does not block downloads from the others.
 
 ## Signing
 

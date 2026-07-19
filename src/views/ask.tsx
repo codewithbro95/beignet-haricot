@@ -4,6 +4,7 @@ import type { OpenMindApi } from "../lib/api";
 import { toClientError } from "../lib/api";
 import type { SearchResult } from "../lib/types";
 import { EmptyState, ErrorNotice, PageHeader, ResultList } from "../components/common";
+import { Markdown } from "../components/markdown";
 
 interface ChatMessage {
   id: number;
@@ -103,7 +104,13 @@ export function AskView({ api, connected }: { api: OpenMindApi; connected: boole
               </div>
               <div class="message-body">
                 <strong>{message.role === "user" ? "You" : "OpenMind"}</strong>
-                {message.text ? <div class="message-text">{message.text}</div> : null}
+                {message.text ? (
+                  message.role === "assistant" ? (
+                    <Markdown>{message.text}</Markdown>
+                  ) : (
+                    <div class="message-text">{message.text}</div>
+                  )
+                ) : null}
                 {message.pending && !message.text ? (
                   <div class="thinking-dots" aria-label="OpenMind is answering">
                     <span />

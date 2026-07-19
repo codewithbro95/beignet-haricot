@@ -462,6 +462,88 @@ textarea:disabled {
   overflow-wrap: anywhere;
 }
 
+.markdown {
+  color: #373632;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown pre,
+.markdown table {
+  margin: 9px 0;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 21px;
+}
+
+.markdown li + li {
+  margin-top: 4px;
+}
+
+.markdown blockquote {
+  padding-left: 12px;
+  border-left: 3px solid #d8d6d1;
+  color: var(--muted);
+}
+
+.markdown code {
+  padding: 2px 4px;
+  border: 1px solid #deddd9;
+  border-radius: 4px;
+  background: #f4f3f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+.markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 12px;
+  border: 1px solid #deddd9;
+  border-radius: 6px;
+  background: #f4f3f0;
+}
+
+.markdown pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.markdown a {
+  color: var(--green);
+  text-underline-offset: 2px;
+}
+
+.markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.markdown th,
+.markdown td {
+  padding: 6px 8px;
+  border: 1px solid #deddd9;
+  text-align: left;
+}
+
 .thinking-dots {
   display: flex;
   gap: 4px;

@@ -97,12 +97,46 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml
           cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 
-  build:
-    name: Build (${{ matrix.label }})
+  prepare:
+    name: Prepare GitHub release
     needs: [metadata, verify]
     if: needs.metadata.outputs.should_release == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
     permissions:
-      contents: read
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Prepare release notes
+        run: node scripts/release-info.mjs notes > release-notes.md
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.metadata.outputs.version }}
+        shell: bash
+        run: |
+          TAG="v${VERSION}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --draft --title "$TAG" --notes-file release-notes.md
+          else
+            gh release create "$TAG" --target "$GITHUB_SHA" --draft --title "$TAG" --notes-file release-notes.md
+          fi
+
+  build:
+    name: Build (${{ matrix.label }})
+    needs: [metadata, verify, prepare]
+    if: needs.metadata.outputs.should_release == 'true' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -151,7 +185,8 @@ jobs:
         run: npm ci
 
       - name: Build distributables
-        uses: tauri-apps/tauri-action@v0.6.2
+        id: tauri
+        uses: tauri-apps/tauri-action@v1.0.0
         env:
           APPLE_SIGNING_IDENTITY: ${{ matrix.platform == 'macos-latest' && '-' || '' }}
         with:
@@ -160,49 +195,28 @@ jobs:
           workflowArtifactNamePattern: tauri-[platform]-[arch]-[bundle]
           releaseAssetNamePattern: '[name]_[version]_[platform]_[arch][setup].[ext]'
 
-  publish:
-    name: Publish GitHub release
-    needs: [metadata, build]
-    if: needs.metadata.outputs.should_release == 'true' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Download distributables
-        uses: actions/download-artifact@v4
-        with:
-          pattern: tauri-*
-          path: release-assets
-          merge-multiple: true
-
-      - name: Prepare release notes
-        run: node scripts/release-info.mjs notes > release-notes.md
-
-      - name: Publish complete release
+      - name: Publish successful platform artifacts
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.metadata.outputs.version }}
         shell: bash
         run: |
+          set -euo pipefail
           TAG="v${VERSION}"
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --draft --title "$TAG" --notes-file release-notes.md
-          else
-            gh release create "$TAG" --target "$GITHUB_SHA" --draft --title "$TAG" --notes-file release-notes.md
-          fi
-
+          found=false
           while IFS= read -r -d '' asset; do
+            found=true
             gh release upload "$TAG" "$asset" --clobber
-          done < <(find release-assets -type f -print0)
+          done < <(
+            find src-tauri/target -type f -path '*/bundle/*' \
+              \( -name '*.dmg' -o -name '*.exe' -o -name '*.msi' -o -name '*.AppImage' -o -name '*.deb' \) \
+              -print0
+          )
+
+          if [ "$found" = false ]; then
+            echo "The build succeeded but produced no installable artifacts." >&2
+            exit 1
+          fi
 
           gh release edit "$TAG" --draft=false --latest
