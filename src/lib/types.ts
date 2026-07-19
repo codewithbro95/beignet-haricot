@@ -104,17 +104,29 @@ export interface ImagePreview {
 }
 
 export interface AskResponse {
+  format: "markdown";
+  session_id: string;
   answer: string;
   sources: SearchResult[];
 }
 
 export interface StreamEvent {
-  event: "delta" | "sources" | "done" | "error";
+  event: "meta" | "delta" | "sources" | "done" | "error";
   data: {
+    format?: "markdown";
+    session_id?: string;
+    reasoning?: boolean;
     text?: string;
     message?: string;
     sources?: SearchResult[];
   };
+}
+
+export interface AskOptions {
+  limit?: number;
+  includeSources?: boolean;
+  reasoning?: boolean;
+  sessionId?: string | null;
 }
 
 export interface ClientSettings {
