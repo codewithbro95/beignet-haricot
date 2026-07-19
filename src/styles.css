@@ -544,6 +544,60 @@ textarea:disabled {
   text-align: left;
 }
 
+.thinking-disclosure {
+  margin: 2px 0 10px;
+  color: var(--muted);
+}
+
+.thinking-disclosure summary {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+}
+
+.thinking-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.thinking-chevron {
+  transition: transform 140ms ease;
+}
+
+.thinking-disclosure[open] .thinking-chevron {
+  transform: rotate(90deg);
+}
+
+.thinking-active {
+  animation: thinking-text 1.15s ease-in-out infinite;
+}
+
+@keyframes thinking-text {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+.thinking-content {
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 2px 0 6px 20px;
+  padding: 9px 11px;
+  border-left: 2px solid var(--border-strong);
+  color: #686660;
+  background: #fafaf8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .thinking-dots {
   display: flex;
   gap: 4px;
@@ -584,9 +638,8 @@ textarea:disabled {
 
 .composer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
-  align-items: end;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
   padding: 8px;
   border: 1px solid var(--border-strong);
   border-radius: 7px;
@@ -610,6 +663,40 @@ textarea:disabled {
   background: transparent;
   font-size: 13px;
   line-height: 1.45;
+}
+
+.composer-footer {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reasoning-toggle {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reasoning-toggle:hover {
+  color: var(--text);
+  background: #f2f2ef;
+}
+
+.reasoning-toggle.active {
+  border-color: #bed5c6;
+  color: var(--green);
+  background: var(--green-soft);
 }
 
 .send-button {

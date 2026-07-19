@@ -5,7 +5,7 @@ use eventsource_stream::Eventsource;
 use futures_util::StreamExt;
 use image::{ImageFormat, ImageReader, Limits};
 use reqwest::{Client, Method, StatusCode};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tauri::{ipc::Channel, State};
 use url::Url;
@@ -62,6 +62,16 @@ impl ClientError {
 pub struct StreamEvent {
     event: String,
     data: Value,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StreamAskRequest {
+    question: String,
+    limit: u8,
+    include_sources: bool,
+    reasoning: bool,
+    session_id: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -163,22 +173,30 @@ pub async fn openmind_image_preview(
 pub async fn stream_openmind_ask(
     state: State<'_, ClientState>,
     base_url: String,
-    question: String,
-    limit: u8,
-    include_sources: bool,
+    request: StreamAskRequest,
     on_event: Channel<StreamEvent>,
 ) -> Result<(), ClientError> {
-    let question = question.trim();
+    let question = request.question.trim();
     if question.is_empty() || question.chars().count() > 4000 {
         return Err(ClientError::new(
             "validation",
             "Question must contain between 1 and 4,000 characters.",
         ));
     }
-    if !(1..=20).contains(&limit) {
+    if !(1..=20).contains(&request.limit) {
         return Err(ClientError::new(
             "validation",
             "Result limit must be between 1 and 20.",
+        ));
+    }
+    if request
+        .session_id
+        .as_deref()
+        .is_some_and(|session_id| !valid_identifier(session_id, "chat_", 21))
+    {
+        return Err(ClientError::new(
+            "validation",
+            "The OpenMind chat session ID is invalid.",
         ));
     }
 
@@ -189,8 +207,10 @@ pub async fn stream_openmind_ask(
         .bearer_auth(read_api_token().await?)
         .json(&json!({
             "question": question,
-            "limit": limit,
-            "include_sources": include_sources,
+            "limit": request.limit,
+            "include_sources": request.include_sources,
+            "reasoning": request.reasoning,
+            "session_id": request.session_id,
         }))
         .send()
         .await
@@ -276,7 +296,10 @@ fn validate_operation(method: &Method, path: &str) -> Result<(), ClientError> {
     );
     let parameterized = match method.as_str() {
         "GET" => valid_id_path(path, "/api/v1/documents/", "file_", 21),
-        "DELETE" => valid_id_path(path, "/api/v1/sources/", "src_", 64),
+        "DELETE" => {
+            valid_id_path(path, "/api/v1/sources/", "src_", 64)
+                || valid_id_path(path, "/api/v1/chat/sessions/", "chat_", 21)
+        }
         _ => false,
     };
 
@@ -466,10 +489,16 @@ mod tests {
             validate_operation(&Method::GET, "/api/v1/documents/file_0123456789abcdef").is_ok()
         );
         assert!(validate_operation(&Method::DELETE, "/api/v1/sources/src_0123456789ab").is_ok());
+        assert!(validate_operation(
+            &Method::DELETE,
+            "/api/v1/chat/sessions/chat_0123456789abcdef"
+        )
+        .is_ok());
 
         assert!(validate_operation(&Method::POST, "/api/v1/raw/query").is_err());
         assert!(validate_operation(&Method::GET, "/api/v1/search").is_err());
         assert!(validate_operation(&Method::DELETE, "/api/v1/sources/../../files").is_err());
+        assert!(validate_operation(&Method::DELETE, "/api/v1/chat/sessions/not-a-chat").is_err());
         assert!(validate_operation(&Method::GET, "/api/v1/documents/not-a-file-id").is_err());
     }
 

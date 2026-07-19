@@ -2,6 +2,7 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import { DEFAULT_API_URL } from "../config";
 import type {
   AskResponse,
+  AskOptions,
   ClientError,
   ClientSettings,
   HealthResponse,
@@ -98,12 +99,21 @@ export class OpenMindApi {
     return this.request("POST", "/api/v1/search", { query, limit });
   }
 
-  ask(question: string, limit = 8): Promise<AskResponse> {
+  ask(question: string, options: AskOptions = {}): Promise<AskResponse> {
     return this.request("POST", "/api/v1/ask", {
       question,
-      limit,
-      include_sources: true,
+      limit: options.limit ?? 8,
+      include_sources: options.includeSources ?? true,
+      reasoning: options.reasoning ?? false,
+      session_id: options.sessionId ?? null,
     });
+  }
+
+  endChatSession(sessionId: string): Promise<void> {
+    return this.request(
+      "DELETE",
+      `/api/v1/chat/sessions/${encodeURIComponent(sessionId)}`,
+    );
   }
 
   openFile(fileId: string): Promise<void> {
@@ -121,16 +131,20 @@ export class OpenMindApi {
   async streamAsk(
     question: string,
     onEvent: (event: StreamEvent) => void,
-    limit = 8,
+    options: AskOptions = {},
   ): Promise<void> {
     ensureDesktopBridge();
     const channel = new Channel<StreamEvent>();
     channel.onmessage = onEvent;
     await invoke("stream_openmind_ask", {
       baseUrl: this.baseUrl,
-      question,
-      limit,
-      includeSources: true,
+      request: {
+        question,
+        limit: options.limit ?? 8,
+        includeSources: options.includeSources ?? true,
+        reasoning: options.reasoning ?? false,
+        sessionId: options.sessionId ?? null,
+      },
       onEvent: channel,
     });
   }
